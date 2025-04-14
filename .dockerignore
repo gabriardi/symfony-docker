@@ -1,0 +1,11 @@
+node_modules/
+var/
+vendor/*
+.git
+.dockerignore
+.gitignore
+.gitlab-ci.yml
+.php_cs.cache
+docker-compose*
+compose*
+README.md

@@ -1,0 +1,19 @@
+services:
+    php:
+        build:
+            context: .
+            dockerfile: docker/dev/php/Dockerfile
+            args:
+                APP_ENV: dev
+
+    apache:
+        ports:
+            - 8080:80
+            - 9003:9003
+
+    mariadb:
+        environment:
+            MARIADB_ROOT_PASSWORD: root
+            MARIADB_DATABASE: app
+            MARIADB_USER: app
+            MARIADB_PASSWORD: password

@@ -1,0 +1,89 @@
+services:
+  php:
+    container_name: app-php-dev
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.dev
+      args:
+        APP_ENV: prod
+        RELEASE_SHA: $CI_COMMIT_SHA
+    volumes:
+      - ./symfony:/var/www/html
+    networks:
+      - app_network
+
+  apache:
+    container_name: app-apache
+    image: httpd:2.4.63
+    restart: always
+    depends_on:
+      - php
+    ports:
+      - 80:80
+    volumes:
+      - ./symfony/public:/usr/local/apache2/htdocs/
+      - ./docker/base/apache/httpd.conf:/usr/local/apache2/conf/httpd.conf
+    networks:
+      - app_network
+
+  mariadb:
+    container_name: app-mariadb
+    image: mariadb:10.11.11
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: app
+      MARIADB_USER: app
+      MARIADB_PASSWORD: password
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - app_network
+
+  adminer:
+    container_name: app-adminer
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+    networks:
+      - app_network
+
+  node:
+    container_name: app-node
+    image: node:22.14-alpine3.20
+
+  redis:
+    container_name: app-redis
+    image: redis:alpine
+    restart: always
+    networks:
+      - app_network
+
+  rabbitmq:
+    container_name: app-rabbitmq
+    image: rabbitmq:4.0.8-alpine
+    restart: always
+    ports:
+      - 15672:15672
+      # - 5672:5672
+    networks:
+      - app_network
+
+  elasticsearch:
+    container_name: app-elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.4
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    # ports:
+    #   - 9200:9200
+    networks:
+      - app_network
+
+networks:
+  app_network:
+
+volumes:
+  mariadb_data:
